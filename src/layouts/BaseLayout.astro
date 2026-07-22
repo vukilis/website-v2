@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import ThreeBackground from '../components/ThreeBackground.astro';
+import BackToTopButton from '../components/BackToTopButton.astro';
 
 interface Props {
   title?: string;
@@ -28,6 +29,18 @@ const {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <title>{title}</title>
+    
+    <script is:inline>
+      (function() {
+        try {
+          var stored = (typeof localStorage !== 'undefined' && localStorage.getItem('theme'));
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+    
     <ClientRouter />
   </head>
   <body>
@@ -109,5 +122,71 @@ const {
         document.addEventListener('astro:page-load', bindInteractiveHover);
       }
     </script>
+
+    <script is:inline>
+      (function() {
+        if (window.__themeInitialized) return;
+        window.__themeInitialized = true;
+
+        const html = document.documentElement;
+        const STORAGE_KEY = 'theme';
+
+        const getSystemTheme = () => 
+          window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+        const getSavedTheme = () => {
+          try { return localStorage.getItem(STORAGE_KEY); } 
+          catch (e) { return null; }
+        };
+
+        const getInitialTheme = () => getSavedTheme() || getSystemTheme();
+
+        const applyTheme = (theme, shouldPersist = true) => {
+          html.setAttribute('data-theme', theme);
+          const toggleBtn = document.getElementById('theme-toggle');
+          if (toggleBtn) {
+            toggleBtn.setAttribute('aria-pressed', String(theme === 'dark'));
+            toggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+          }
+          if (shouldPersist) {
+            try { localStorage.setItem(STORAGE_KEY, theme); } catch (e) {}
+          }
+        };
+
+        const toggle = () => {
+          const current = html.getAttribute('data-theme') || getSavedTheme() || getSystemTheme();
+          applyTheme(current === 'dark' ? 'light' : 'dark', true);
+        };
+
+        // Apply theme immediately
+        const initialSaved = getSavedTheme();
+        applyTheme(initialSaved || getSystemTheme(), !!initialSaved);
+
+        // Event delegation for the toggle button
+        document.addEventListener('click', (e) => {
+          const target = e.target;
+          const toggleBtn = target && target.closest ? target.closest('#theme-toggle') : null;
+          if (toggleBtn) {
+            e.preventDefault();
+            toggle();
+          }
+        });
+
+        // Follow system preference only when no saved preference exists
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        mq.addEventListener('change', (e) => {
+          if (!getSavedTheme()) {
+            applyTheme(e.matches ? 'dark' : 'light', false);
+          }
+        });
+
+        // Re-enforce theme after every Astro view transition
+        document.addEventListener('astro:page-load', () => {
+          const saved = getSavedTheme();
+          applyTheme(saved || getSystemTheme(), !!saved);
+        });
+      })();
+    </script>
+    <BackToTopButton />
   </body>
 </html>

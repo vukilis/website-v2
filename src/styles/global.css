@@ -1,6 +1,7 @@
-/* Global styles for dark abyss theme */
+@import "tailwindcss";
+
+/* Global styles - dark theme is the default */
 :root {
-  /* Color Palette - Developer Dark Theme */
   --color-bg-dark: #0F172A;
   --color-bg-darker: #020617;
   --color-bg-card: #1E293B;
@@ -13,19 +14,40 @@
   --color-text-dim: #94A3B8;
   --color-border: #334155;
   --color-shadow: rgba(59, 130, 246, 0.3);
+  --color-bg-overlay: rgba(15, 23, 42, 0.85);
+  --color-bg-overlay-heavy: rgba(15, 23, 42, 0.98);
 
-  /* Typography */
   --font-heading: 'Space Grotesk', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
-
-  /* Spacing */
   --nav-height: 80px;
+}
+
+[data-theme="light"] {
+  --color-bg-dark: #F8FAFC;
+  --color-bg-darker: #F1F5F9;
+  --color-bg-card: #FFFFFF;
+  --color-primary: #2563EB;
+  --color-accent-purple: #7C3AED;
+  --color-accent-pink: #DB2777;
+  --color-accent-blue: #2563EB;
+  --color-accent-cyan: #0891B2;
+  --color-text: #0F172A;
+  --color-text-dim: #475569;
+  --color-border: #E2E8F0;
+  --color-shadow: rgba(37, 99, 235, 0.15);
+  --color-bg-overlay: rgba(248, 250, 252, 0.85);
+  --color-bg-overlay-heavy: rgba(248, 250, 252, 0.98);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Remove default underline from all anchor elements */
+a {
+  text-decoration: none;
 }
 
 html {

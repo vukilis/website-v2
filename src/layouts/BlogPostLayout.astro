@@ -3,7 +3,6 @@ import BaseLayout from './BaseLayout.astro';
 import Navigation from '../components/Navigation.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 import PostComments from "../components/PostComments.astro";
-import BackToTopButton from "../components/BackToTopButton.astro";
 
 interface Props {
   title: string;
@@ -93,7 +92,6 @@ const formattedUpdatedDate = updatedDate?.toLocaleDateString('en-US', {
       <PostComments />
     </div>
   </article>
-  <BackToTopButton />
 </BaseLayout>
 
 <style>
@@ -108,7 +106,7 @@ const formattedUpdatedDate = updatedDate?.toLocaleDateString('en-US', {
   }
 
   .container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
   }
 

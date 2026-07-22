@@ -6,24 +6,24 @@ lastmod: 2026-06-14T19:00:54+02:00
 draft: false
 license: ""
 
-tags: [linux, homelab, website, docker, docker-compose, selfhost, dssds, drfdfd, fsdfdsf, rsdfdsfdsf, fdfd, gfgfd, gfgfdgf]
+tags: [linux, homelab, website, docker, docker-compose, selfhost]
 categories: [Homelab, Website]
 description: "Let's be honest, containerization has fundamentally changed how we ship software, but the experience..."
-
-featuredImagePreview: "/images/2026/dockerninja_infinite_docker_stacks/dockerninja_infinite_docker_stacks.png"
-
 ---
+<!--more-->
+
+<div align="center" style="padding-top:30px;">
+  <img src="https://dockerninja.org/apple-touch-icon.png" alt="Docker Ninja" />
+  <h1>Docker Ninja</h1>
+  <h3>The official frontend application for dockerninja.org 🚀</h3>
+  <p><strong>Master your container universe with perfectly crafted stacks for any application — all in one place</strong></p>
+</div>
 
 ## Getting Started
 
 Containerization redefined my reality, yet I constantly hit a ceiling. I grew tired of the fragmented search for reliable infrastructure code and the endless scouring for inspiration. I built this universe to collapse the hurdles. Whether you are a student exploring the basics, a tinkerer building a homelab or a pro architecting a stack, this is the perfect place for you. Official link: https://dockerninja.org
 
-<div style="width: 100%; margin: 10px auto; text-align: center;">
-    {{< image 
-        src="https://dockerninja.org/page_preview.png" 
-        alt="DockerNinja Logo"
-    >}}
-</div>
+![DockerNinja Logo](https://dockerninja.org/page_preview.png)
 
 ## The Problem: Fragmented Container Discovery
 
@@ -57,34 +57,19 @@ The application is built around a core set of features that make it genuinely us
 
 The dedicated **Containers page** presents the complete hub. Every application in the database is represented here, sortable alphabetically (A–Z / Z–A) or by global favorites. Pagination keeps the interface snappy regardless of hub size, and a real-time search bar lets you filter down to exactly what you need, all without leaving the page.
 
-<div style="width: 100%; margin: 10px auto; text-align: center;">
-    {{< image 
-        src="/images/2026/dockerninja_infinite_docker_stacks/containers.png" 
-        alt="Containers"
-    >}}
-</div>
+![Containers](/images/2026/dockerninja_infinite_docker_stacks/containers.png)
 
 ### Browsing by Category
 
 Applications are organized into logical categories — from reverse proxies and media servers to databases and monitoring tools. The **Categories view** lets you explore stacks by architecture layer, making it easy to discover related tools. Each category shows its container count, and the active selection persists in the URL so you can share filtered views.
 
-<div style="width: 100%; margin: 10px auto; text-align: center;">
-    {{< image 
-        src="/images/2026/dockerninja_infinite_docker_stacks/categories.png" 
-        alt="Categories"
-    >}}
-</div>
+![Categories](/images/2026/dockerninja_infinite_docker_stacks/categories.png)
 
 ### Instant Search
 
 A global search bar filters the entire registry in real-time. Whether you know the exact name or are casting around for inspiration, the search gets you there fast, without reloading the page.
 
-<div style="width: 100%; margin: 10px auto; text-align: center;">
-    {{< image 
-        src="/images/2026/dockerninja_infinite_docker_stacks/search.png" 
-        alt="Search Application"
-    >}}
-</div>
+![Search Application](/images/2026/dockerninja_infinite_docker_stacks/search.png)
 
 ### One-Click Copy & Export
 
@@ -94,23 +79,13 @@ Every application card opens a modal with the full Docker Compose configuration.
 - **Download** it as a `.yaml` and `.env` file, ready to deploy
 - **Copy the CLI command** for `docker compose up` or `docekr run`
 
-<div style="width: 100%; margin: 10px auto; text-align: center;">
-    {{< image 
-        src="/images/2026/dockerninja_infinite_docker_stacks/app_modal.png" 
-        alt="App Modal"
-    >}}
-</div>
+![App Modal](/images/2026/dockerninja_infinite_docker_stacks/app_modal.png)
 
 ### Favorites & Recently Viewed
 
 Users can like any container stack. Favorites are counted globally and sorted in a dedicated view. The app also tracks your **recently viewed** items locally, so you can jump back into a configuration you were just editing without hunting through your history.
 
-<div style="width: 100%; margin: 10px auto; text-align: center;">
-    {{< image 
-        src="/images/2026/dockerninja_infinite_docker_stacks/recently.png" 
-        alt="Recently Activity"
-    >}}
-</div>
+![Recently Activity](/images/2026/dockerninja_infinite_docker_stacks/recently.png)
 
 ### Dark & Light Theme
 
@@ -133,16 +108,14 @@ Check more on official github repo: https://github.com/vukilis/docker-ninja
 
 ## Technical Stack
 
-<div align="center">
-  <p>
-    <img width=90px src="https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js&logoColor=white" />
-    <img width=81px src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" />
-    <img width=108px src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-    <img width=128px src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" />
-    <img width=80px src="https://img.shields.io/badge/Nix_Shell-5277C3?style=flat-square&logo=nixos&logoColor=white" />
-    <img width=70px src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" />
-    <img width=86px src="https://img.shields.io/badge/Cloudflare-F6821F?style=flat-square&logo=cloudflare&logoColor=white" />
-  </p>
+<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 5px; padding: 20px 0;">
+  <img width=90px src="https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js&logoColor=white" />
+  <img width=81px src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" />
+  <img width=108px src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" />
+  <img width=128px src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" />
+  <img width=80px src="https://img.shields.io/badge/Nix_Shell-5277C3?style=flat-square&logo=nixos&logoColor=white" />
+  <img width=70px src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" />
+  <img width=86px src="https://img.shields.io/badge/Cloudflare-F6821F?style=flat-square&logo=cloudflare&logoColor=white" />
 </div>
 
 ## The Open-Source Model
@@ -157,16 +130,14 @@ Maintainers require focused PRs (one change per PR), documented environment vari
 
 ## Fuel the Project 🚀
 
-<div align="center">
-  <a a href="https://buymeacoffee.com/vukilis">
+<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; padding: 20px 0;">
+  <a style="border-bottom: none" href="https://buymeacoffee.com/vukilis">
     <img src="https://img.shields.io/badge/Support_on_buymeacoffee-FF5F5F?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support on Ko-fi" />
   </a>
-  &nbsp;
-  <a href="https://ko-fi.com/vukilis">
+  <a style="border-bottom: none" href="https://ko-fi.com/vukilis">
     <img src="https://img.shields.io/badge/Support_on_Ko--fi-FF2F5F?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Support on Ko-fi" />
   </a>
-  &nbsp;
-  <a href="https://dockerninja.org/sponsoring">
+  <a style="border-bottom: none" href="https://dockerninja.org/sponsoring">
     <img src="https://img.shields.io/badge/DockerNinja.org%2Fsponsoring-60a9fa?style=for-the-badge" alt="Donate via dockerninja.org" />
   </a>
 </div>
