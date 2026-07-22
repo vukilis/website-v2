@@ -57,19 +57,19 @@ The application is built around a core set of features that make it genuinely us
 
 The dedicated **Containers page** presents the complete hub. Every application in the database is represented here, sortable alphabetically (A–Z / Z–A) or by global favorites. Pagination keeps the interface snappy regardless of hub size, and a real-time search bar lets you filter down to exactly what you need, all without leaving the page.
 
-![Containers](/images/2026/dockerninja_infinite_docker_stacks/containers.png)
+![Containers](../../../assets/images/2026/dockerninja_infinite_docker_stacks/containers.png)
 
 ### Browsing by Category
 
 Applications are organized into logical categories — from reverse proxies and media servers to databases and monitoring tools. The **Categories view** lets you explore stacks by architecture layer, making it easy to discover related tools. Each category shows its container count, and the active selection persists in the URL so you can share filtered views.
 
-![Categories](/images/2026/dockerninja_infinite_docker_stacks/categories.png)
+![Categories](../../../assets/images/2026/dockerninja_infinite_docker_stacks/categories.png)
 
 ### Instant Search
 
 A global search bar filters the entire registry in real-time. Whether you know the exact name or are casting around for inspiration, the search gets you there fast, without reloading the page.
 
-![Search Application](/images/2026/dockerninja_infinite_docker_stacks/search.png)
+![Search Application](../../../assets/images/2026/dockerninja_infinite_docker_stacks/search.png)
 
 ### One-Click Copy & Export
 
@@ -79,13 +79,13 @@ Every application card opens a modal with the full Docker Compose configuration.
 - **Download** it as a `.yaml` and `.env` file, ready to deploy
 - **Copy the CLI command** for `docker compose up` or `docekr run`
 
-![App Modal](/images/2026/dockerninja_infinite_docker_stacks/app_modal.png)
+![App Modal](../../../assets/images/2026/dockerninja_infinite_docker_stacks/app_modal.png)
 
 ### Favorites & Recently Viewed
 
 Users can like any container stack. Favorites are counted globally and sorted in a dedicated view. The app also tracks your **recently viewed** items locally, so you can jump back into a configuration you were just editing without hunting through your history.
 
-![Recently Activity](/images/2026/dockerninja_infinite_docker_stacks/recently.png)
+![Recently Activity](../../../assets/images/2026/dockerninja_infinite_docker_stacks/recently.png)
 
 ### Dark & Light Theme
 
