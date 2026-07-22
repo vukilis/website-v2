@@ -6,7 +6,7 @@ lastmod: 2026-06-14T19:00:54+02:00
 draft: false
 license: ""
 
-tags: [linux, homelab, website, docker, docker-compose, selfhost]
+tags: [linux, homelab, website, docker, docker-compose, selfhost, dssds, drfdfd, fsdfdsf, rsdfdsfdsf, fdfd, gfgfd, gfgfdgf]
 categories: [Homelab, Website]
 description: "Let's be honest, containerization has fundamentally changed how we ship software, but the experience..."
 
