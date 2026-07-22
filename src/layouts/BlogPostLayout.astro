@@ -1,0 +1,530 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date | undefined;
+  tags?: string[] | undefined;
+  categories?: string[] | undefined;
+  wordCount: number;
+  readingTime: number;
+}
+
+const base = import.meta.env.BASE_URL;
+const { title, description, pubDate, updatedDate, tags, categories, wordCount, readingTime } = Astro.props;
+
+const formattedPubDate = pubDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const formattedUpdatedDate = updatedDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={`${title} - Darkness`} description={description}>
+  <Navigation />
+
+  <article class="blog-post">
+    <div class="container">
+      <header class="post-header">
+        <a href={`${base}blog/`} class="back-link">← Back to Blog</a>
+        <h1 class="post-title">{title}</h1>
+        <div class="post-meta">
+          <time class="post-date">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {formattedPubDate}
+          </time>
+          <span class="post-word-count">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            {wordCount} words
+          </span>
+          <span class="post-reading-time">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {readingTime} minutes
+          </span>
+          {formattedUpdatedDate && (
+            <span class="post-updated">
+              <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="M15 5l4 4"/></svg>
+              Updated: {formattedUpdatedDate}
+            </span>
+          )}
+        </div>
+        {categories && categories.length > 0 && (
+          <div class="post-tags">
+            {categories.map((category) => (
+              <a href={`${base}blog/?category=${encodeURIComponent(category)}`} class="tag tag-category" title={`Filter by category: ${category}`}>
+                {category}
+              </a>
+            ))}
+          </div>
+        )}
+        {tags && tags.length > 0 && (
+          <div class="post-tags">
+            {tags.map((tag) => (
+              <a href={`${base}blog/?tag=${encodeURIComponent(tag)}`} class="tag" title={`Filter by tag: ${tag}`}>
+                {tag}
+              </a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div class="post-layout" id="toc-container" data-toc>
+        <div class="post-content">
+          <slot />
+        </div>
+        <aside aria-label="Table of contents">
+          <TableOfContents layout="sidebar" />
+        </aside>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  aside {
+    position: sticky;
+    top: 6rem;
+  }
+
+  .blog-post {
+    min-height: 100vh;
+    padding: 8rem 2rem 5rem;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .post-header {
+    margin-bottom: 3.5rem;
+    animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-accent-purple);
+    text-decoration: none;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.01em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .back-link::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--color-accent-purple), var(--color-accent-pink));
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1px;
+  }
+
+  .back-link:hover {
+    color: var(--color-accent-pink);
+    transform: translateX(-4px);
+  }
+
+  .back-link:hover::before {
+    width: 100%;
+  }
+
+  .post-title {
+    font-family: var(--font-body);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 900;
+    margin-bottom: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-text);
+  }
+
+  .post-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+    flex-wrap: wrap;
+    color: var(--color-text-dim);
+  }
+
+  .post-meta > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 500;
+  }
+
+  .meta-icon {
+    width: 0.95em;
+    height: 0.95em;
+    opacity: 0.9;
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .post-meta > *:hover .meta-icon {
+    opacity: 1;
+  }
+
+  .post-date {
+    color: var(--color-accent-purple);
+    font-weight: 600;
+  }
+
+  .post-word-count {
+    color: var(--color-text-dim);
+  }
+
+  .post-reading-time {
+    color: var(--color-text-dim);
+  }
+
+  .post-updated {
+    color: var(--color-text-dim);
+    font-style: italic;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-accent-purple);
+    font-family: var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tag::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.1));
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .tag:hover {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15);
+  }
+
+  .tag:hover::before {
+    opacity: 1;
+  }
+
+  .tag-category {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--color-accent-blue);
+  }
+
+  .tag-category::before {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.1));
+  }
+
+  .tag-category:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  .post-layout {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .post-content {
+    background: var(--color-bg-card);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 1rem;
+    padding: 3rem;
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .post-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+  }
+
+  .post-content :global(h1),
+  .post-content :global(h2),
+  .post-content :global(h3),
+  .post-content :global(h4) {
+    color: var(--color-text);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    scroll-margin-top: calc(var(--nav-height) + 20px);
+  }
+
+  .post-content :global(h2) {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--color-accent-purple), var(--color-accent-pink));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.3;
+  }
+
+  .post-content :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .post-content :global(h3) {
+    font-size: 1.5rem;
+    color: var(--color-text-dim);
+  }
+
+  .post-content :global(h4) {
+    font-size: 1.1rem;
+    color: var(--color-text-dim);
+    opacity: 0.8;
+  }
+
+  .post-content :global(p) {
+    line-height: 1.85;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-dim);
+    font-size: 0.95rem;
+  }
+
+  .post-content :global(a) {
+    color: var(--color-accent-purple);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-accent-purple);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+  }
+
+  .post-content :global(a:hover) {
+    color: var(--color-accent-pink);
+    border-color: var(--color-accent-pink);
+  }
+
+  .post-content :global(code) {
+    background: rgba(168, 85, 247, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: var(--color-accent-purple);
+  }
+
+  .post-content :global(pre) {
+    background: var(--color-bg-darker);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  .post-content :global(pre::before) {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.2), transparent);
+  }
+
+  .post-content :global(pre code) {
+    background: none;
+    padding: 0;
+    color: var(--color-text);
+  }
+
+  .post-content :global(ul),
+  .post-content :global(ol) {
+    margin: 1.5rem 0;
+    padding-left: 2rem;
+    color: var(--color-text-dim);
+  }
+
+  .post-content :global(li) {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+  }
+
+  .post-content :global(blockquote) {
+    border-left: 3px solid var(--color-accent-purple);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: var(--color-text-dim);
+    background: rgba(168, 85, 247, 0.04);
+    border-radius: 0 0.5rem 0.5rem 0;
+    position: relative;
+  }
+
+  .post-content :global(blockquote::before) {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--color-accent-purple), var(--color-accent-pink));
+    border-radius: 0 2px 2px 0;
+  }
+
+  .post-content :global(hr) {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.08), transparent);
+    margin: 2.5rem 0;
+  }
+
+  .post-content :global(img) {
+    max-width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  .post-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .post-content :global(th) {
+    background: rgba(168, 85, 247, 0.08);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+  }
+
+  .post-content :global(td) {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    color: var(--color-text-dim);
+  }
+
+  .post-content :global(tr:hover td) {
+    background: rgba(168, 85, 247, 0.03);
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 1100px) {
+    .post-layout {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .blog-post {
+      padding: calc(var(--nav-height) + 2rem) 1rem 3rem;
+    }
+
+    .post-content {
+      padding: 2rem 1.5rem;
+    }
+
+    .post-title {
+      font-size: clamp(2rem, 8vw, 2.8rem);
+    }
+
+    .post-meta {
+      gap: 1rem;
+      font-size: 0.78rem;
+    }
+
+    .post-content :global(h2) {
+      font-size: 1.5rem;
+    }
+
+    .post-content :global(h3) {
+      font-size: 1.15rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .post-content {
+      padding: 1.5rem 1.25rem;
+    }
+
+    .post-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+</style>
+
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const tocContainer = document.getElementById('toc-container');
+    if (!tocContainer) return;
+
+    const contentsHeading = tocContainer.querySelector('.post-content h2');
+    if (contentsHeading && /^contents?$/i.test(contentsHeading.textContent?.trim() || '')) {
+      const list = contentsHeading.nextElementSibling;
+      if (list && (list.tagName === 'UL' || list.tagName === 'OL')) {
+        contentsHeading.remove();
+        list.remove();
+      }
+    }
+  });
+</script>

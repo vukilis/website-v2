@@ -1,0 +1,244 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  posts: { data: { title: string; tags?: string[]; categories?: string[] } }[];
+}
+
+const { posts } = Astro.props;
+const allCategories = [...new Set(posts.flatMap(p => p.data.categories ?? []))].sort();
+
+const categoryCounts = new Map(
+  allCategories.map(category => [
+    category,
+    posts.filter(p => (p.data.categories ?? []).includes(category)).length,
+  ])
+);
+---
+
+<div class="blog-filter">
+  {allCategories.length > 0 && (
+    <div class="filter-sections">
+      <div class="filter-section">
+        <span class="filter-label">Categories</span>
+        <div class="filter-pills">
+          {allCategories.map(category => (
+            <button
+              class="filter-pill"
+              data-filter-type="category"
+              data-filter-value={category}
+            >
+              {category} <span class="filter-pill-count">{categoryCounts.get(category)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+<script>
+  let popstateBound = false;
+
+  const initFilters = () => {
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const blogCards = document.querySelectorAll('.blog-card');
+
+    if (filterPills.length === 0 || blogCards.length === 0) return;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const activeFilters = new Map();
+
+    if (searchParams.has('tag')) activeFilters.set('tag', searchParams.get('tag'));
+    if (searchParams.has('category')) activeFilters.set('category', searchParams.get('category'));
+
+    const navigateToFilter = (type, value) => {
+      activeFilters.clear();
+      if (type === 'tag') {
+        activeFilters.set('tag', value);
+      } else if (type === 'category') {
+        activeFilters.set('category', value);
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (activeFilters.has('tag')) {
+        params.set('tag', activeFilters.get('tag')!);
+      } else {
+        params.delete('tag');
+      }
+      if (activeFilters.has('category')) {
+        params.set('category', activeFilters.get('category')!);
+      } else {
+        params.delete('category');
+      }
+      const qs = params.toString();
+      window.history.pushState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
+      applyFilters();
+    };
+
+    const isFiltered = (card) => {
+      if (activeFilters.size === 0) return true;
+      const cardTags = card.dataset.tags ? JSON.parse(card.dataset.tags) : [];
+      const cardCategories = card.dataset.categories ? JSON.parse(card.dataset.categories) : [];
+      if (activeFilters.has('tag') && !cardTags.includes(activeFilters.get('tag'))) return false;
+      if (activeFilters.has('category') && !cardCategories.includes(activeFilters.get('category'))) return false;
+      return true;
+    };
+
+    blogCards.forEach((card) => {
+      const cardTags = card.querySelectorAll('.tag[data-tag]');
+      cardTags.forEach((tagEl) => {
+        tagEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          navigateToFilter('tag', tagEl.getAttribute('data-tag')!);
+        });
+      });
+    });
+
+    const applyFilters = () => {
+      blogCards.forEach((card) => {
+        card.style.display = isFiltered(card) ? '' : 'none';
+      });
+      filterPills.forEach((pill) => {
+        const type = pill.dataset.filterType;
+        const value = pill.dataset.filterValue;
+        const active = activeFilters.has(type) && activeFilters.get(type) === value;
+        pill.classList.toggle('active', active);
+        pill.style.background = active ? 'rgba(168, 85, 247, 0.2)' : '';
+        pill.style.borderColor = active ? 'rgba(168, 85, 247, 0.5)' : '';
+        pill.style.color = active ? 'var(--color-accent-purple, #8B5CF6)' : '';
+      });
+    };
+
+    filterPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const type = pill.dataset.filterType;
+        const value = pill.dataset.filterValue;
+
+        if (type === 'category' && activeFilters.has('category') && activeFilters.get('category') === value) {
+          activeFilters.delete('category');
+        } else {
+          activeFilters.set(type, value);
+          if (type === 'category') activeFilters.delete('tag');
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if (activeFilters.has('tag')) {
+          params.set('tag', activeFilters.get('tag'));
+        } else {
+          params.delete('tag');
+        }
+        if (activeFilters.has('category')) {
+          params.set('category', activeFilters.get('category'));
+        } else {
+          params.delete('category');
+        }
+        const qs = params.toString();
+        window.history.pushState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
+        applyFilters();
+      });
+    });
+
+    if (!popstateBound) {
+      popstateBound = true;
+      window.addEventListener('popstate', () => {
+        activeFilters.clear();
+        const sp = new URLSearchParams(window.location.search);
+        if (sp.has('tag')) activeFilters.set('tag', sp.get('tag'));
+        if (sp.has('category')) activeFilters.set('category', sp.get('category'));
+        applyFilters();
+      });
+    }
+
+    applyFilters();
+  };
+
+  const scheduleInit = () => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFilters, { once: true });
+    } else {
+      initFilters();
+    }
+  };
+
+  scheduleInit();
+  document.addEventListener('astro:page-load', scheduleInit);
+</script>
+
+<style>
+  .blog-filter {
+    margin-bottom: 2.5rem;
+  }
+
+  .filter-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-label {
+    font-family: var(--font-heading, 'Space Grotesk', sans-serif);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-dim, #94A3B8);
+  }
+
+  .filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .filter-pill {
+    padding: 0.35rem 0.875rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border, #334155);
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-family: var(--font-body, 'DM Sans', sans-serif);
+    color: var(--color-text-dim, #94A3B8);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+
+  .filter-pill:hover {
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.4);
+    color: var(--color-accent-purple, #8B5CF6);
+  }
+
+  .filter-pill.active {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.5);
+    color: var(--color-accent-purple, #8B5CF6);
+  }
+
+  .filter-pill-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.4rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    line-height: 1;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-dim);
+  }
+
+  .filter-pill.active .filter-pill-count {
+    background: rgba(168, 85, 247, 0.3);
+    color: var(--color-accent-purple);
+  }
+</style>

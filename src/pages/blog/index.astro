@@ -1,0 +1,187 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import BlogFilter from '../../components/BlogFilter.astro';
+
+const allBlogPosts = await getCollection('blog');
+const sortedPosts = allBlogPosts.sort((a, b) =>
+  b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const url = new URL(Astro.request.url);
+const selectedTag = url.searchParams.get('tag') ?? null;
+const selectedCategory = url.searchParams.get('category') ?? null;
+
+const filteredPosts = (() => {
+  if (!selectedTag && !selectedCategory) return sortedPosts;
+  return sortedPosts.filter((post) => {
+    const postTags = post.data.tags?.map(t => t.toLowerCase()) ?? [];
+    const postCategories = post.data.categories?.map(c => c.toLowerCase()) ?? [];
+    if (selectedTag && !postTags.includes(selectedTag.toLowerCase())) return false;
+    if (selectedCategory && !postCategories.includes(selectedCategory.toLowerCase())) return false;
+    return true;
+  });
+})();
+
+const hasActiveFilter = selectedTag || selectedCategory;
+---
+
+<BaseLayout
+  title="Blog - Darkness"
+  description="Articles about web development, Three.js, and dark design"
+>
+  <Navigation />
+
+  <main class="blog-page">
+    <div class="container">
+      <header class="blog-header">
+        <h1 class="page-title">Blog</h1>
+        <p class="page-subtitle">
+          Exploring the depths of web development, animations, and dark design
+        </p>
+      </header>
+
+      <BlogFilter posts={sortedPosts} />
+
+      {hasActiveFilter && (
+        <div class="active-filter-bar">
+          <span class="active-filter-text">
+            Filtering by
+            {selectedTag && <strong> tag: {selectedTag}</strong>}
+            {selectedCategory && <strong> category: {selectedCategory}</strong>}
+          </span>
+          <a href={`${Astro.url.pathname}`} class="clear-filter-link">Clear filter</a>
+        </div>
+      )}
+
+      <div class="blog-grid">
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              slug={post.id}
+              tags={post.data.tags}
+              categories={post.data.categories}
+            />
+          ))
+        ) : (
+          <p class="no-results">
+            No posts match your filter criteria. <a href={Astro.url.pathname}>Show all posts</a>.
+          </p>
+        )}
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .blog-page {
+    min-height: 100vh;
+    padding: calc(var(--nav-height) + 2rem) 2rem 5rem;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .blog-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-dim);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .active-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 0.75rem;
+    margin-bottom: 1.75rem;
+    font-size: 0.9rem;
+    color: var(--color-text-dim);
+    animation: fadeInDown 0.3s ease-out;
+  }
+
+  .active-filter-text strong {
+    color: var(--color-accent-purple);
+    font-weight: 600;
+  }
+
+  .clear-filter-link {
+    color: var(--color-accent-pink);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+
+  .clear-filter-link:hover {
+    color: var(--color-text);
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-dim);
+    font-size: 1.05rem;
+  }
+
+  .no-results a {
+    color: var(--color-accent-purple);
+    text-decoration: none;
+  }
+
+  .no-results a:hover {
+    text-decoration: underline;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .blog-page {
+      padding-top: calc(var(--nav-height) + 1rem);
+    }
+
+    .active-filter-bar {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .blog-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
