@@ -1,0 +1,239 @@
+---
+import SocialLinks from './SocialLinks.astro';
+import HomelabStatus from './HomelabStatus.astro';
+
+const navLinks = [
+  { name: 'Home', href: '/' },
+  { name: 'Blog', href: '/blog/' },
+  { name: 'Projects', href: '/projects/' },
+  { name: 'About', href: '/about/' },
+];
+
+interface Props {
+  socialLinks?: {
+    name: string;
+    url: string;
+    icon: string;
+    color?: string;
+  }[];
+}
+
+const { socialLinks } = Astro.props;
+---
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <a href="/" class="footer-logo">
+          <img href="/" src="/logo.png" alt="Vuk1lis logo" class="footer-logo-img" />
+        </a>
+      </div>
+
+      <!-- Homelab status badges -->
+      <div class="footer-sections">
+        <div class="footer-social">
+          <h3 class="footer-heading">Homelab Status</h3>
+          <HomelabStatus />
+        </div>
+      </div>
+
+      <!-- Social links -->
+      <div class="footer-sections">
+        <div class="footer-social">
+          <h3 class="footer-heading">Connect</h3>
+          <SocialLinks links={socialLinks} />
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copyright">&copy; 2023 &ndash; 2026 Vuk1lis</p>
+      <div class="footer-legal">
+        <a href="/privacy" class="footer-legal-link">Privacy</a>
+        <span class="footer-separator" aria-hidden="true">&middot;</span>
+        <a href="/terms" class="footer-legal-link">Terms and Conditions</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-bg-darker);
+    border-top: 1px solid var(--color-border);
+    padding: 4rem 2rem 2.5rem;
+    margin-top: auto;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer-brand {
+    max-width: 320px;
+  }
+
+  .footer-logo {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-logo:hover {
+    color: var(--color-primary);
+  }
+
+  .footer-logo-img {
+    margin-top: 0.75rem;
+    height: 10rem;
+    width: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .footer-logo-img:hover {
+    transform: scale(1.02);
+  }
+
+  .footer-sections {
+    display: flex;
+    gap: 4rem;
+  }
+
+  .footer-heading {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text);
+    margin-bottom: 1.25rem;
+  }
+
+  .footer-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-link {
+    color: var(--color-text-dim);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: inline-block;
+  }
+
+  .footer-link:hover {
+    color: var(--color-primary);
+    transform: translateX(4px);
+  }
+
+  .footer-social :global(.social-links) {
+    justify-content: flex-start;
+  }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .footer-copyright {
+    color: var(--color-text-dim);
+    font-size: 0.875rem;
+  }
+
+  .footer-legal {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .footer-legal-link {
+    color: var(--color-text-dim);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .footer-legal-link:hover {
+    color: var(--color-primary);
+  }
+
+  .footer-separator {
+    color: var(--color-border);
+    user-select: none;
+  }
+
+  @media (max-width: 768px) {
+    .footer {
+      padding: 3rem 1.5rem 2rem;
+    }
+
+    .footer-main {
+      flex-direction: column;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .footer-brand {
+      text-align: center;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .footer-logo {
+      display: block;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
+    .footer-sections {
+      width: 100%;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .footer-nav,
+    .footer-social {
+      text-align: center;
+    }
+
+    .footer-menu {
+      align-items: center;
+    }
+
+    .footer-social :global(.social-links) {
+      justify-content: center;
+    }
+
+    .footer-bottom {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+  }
+</style>

@@ -129,9 +129,15 @@ const categoriesJson = JSON.stringify(categories ?? []);
   }
 
   .tag:hover {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: var(--color-primary);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.4);
     color: var(--color-primary);
+  }
+
+  .tag.active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: var(--color-accent-blue, #3B82F6);
   }
 
   .read-more {

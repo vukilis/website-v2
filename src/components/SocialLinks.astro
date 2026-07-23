@@ -1,0 +1,135 @@
+---
+interface SocialLink {
+  name: string;
+  url: string;
+  icon: string;
+  color?: string;
+}
+
+const defaultLinks: SocialLink[] = [
+  {
+    name: 'GitHub',
+    url: 'https://github.com/kpab',
+    icon: 'github',
+    color: '#ac51e0',
+  },
+  {
+    name: 'LinkedIn',
+    url: 'https://linkedin.com/in/kpab',
+    icon: 'linkedin',
+    color: '#0A66C2',
+  },
+  {
+    name: 'Instagram',
+    url: 'https://instagram.com/kpab',
+    icon: 'instagram',
+    color: '#E4405F',
+  },
+  {
+    name: 'YouTube',
+    url: 'https://youtube.com/@kpab',
+    icon: 'youtube',
+    color: '#FF0000',
+  },
+  {
+    name: 'Steam',
+    url: 'https://steamcommunity.com/id/kpab',
+    icon: 'steam',
+    color: '#575757',
+  },
+  {
+    name: 'Email',
+    url: 'mailto:contact@kpab.dev',
+    icon: 'mail',
+    color: '#EA4335',
+  },
+  {
+    name: 'Ko-fi',
+    url: 'https://ko-fi.com/kpab',
+    icon: 'ko-fi',
+    color: '#FF5E5B',
+  },
+];
+
+interface Props {
+  links?: SocialLink[];
+  class?: string;
+}
+
+const { links = defaultLinks, class: className = '' } = Astro.props;
+
+const iconClasses: Record<string, string> = {
+  github: 'fa-brands fa-github',
+  linkedin: 'fa-brands fa-linkedin',
+  instagram: 'fa-brands fa-instagram',
+  youtube: 'fa-brands fa-youtube',
+  steam: 'fa-brands fa-steam',
+  mail: 'fa-solid fa-envelope',
+  'ko-fi': 'fa-brands fa-ko-fi',
+};
+---
+
+<div class:list={['social-links', className]} aria-label="Social links">
+  {links.map((link) => (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="social-link"
+      aria-label={link.name}
+      title={link.name}
+    >
+      {link.icon ? (
+        <i
+          class={['fa-fw', iconClasses[link.icon] || ''].join(' ')}
+          aria-hidden="true"
+          style={link.color ? `color: ${link.color}` : ''}
+        />
+      ) : null}
+    </a>
+  ))}
+</div>
+
+<style>
+  .social-links {
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-dim);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .social-link:hover {
+    border-color: var(--color-primary);
+    background: rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    color: var(--color-text);
+  }
+
+  .social-link i {
+    width: 18px;
+    font-size: 18px;
+    line-height: 1;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .social-links {
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,19 +1,29 @@
 ---
 // Hero section - Clean, professional design
+import SocialLinks from './SocialLinks.astro';
 const base = import.meta.env.BASE_URL;
 ---
 
 <section class="hero">
   <div class="hero-content">
-    <div class="greeting">Hello, I'm</div>
+    <div class="greeting">
+      <a href={/about/} class="logo">
+        <img src="/logo.png" alt="VUK1LIS" class="logo-img" />
+      </a>
+    </div>
     <h1 class="hero-title">
       <span class="title-text">VUK1LIS</span>
     </h1>
-    <p class="hero-subtitle">Web Developer & Creative Coder</p>
+    <p class="hero-subtitle">DevOps - Linux Enthusiast - VibeCoder</p>
     <p class="hero-description">
-      Building immersive web experiences with Three.js, modern animations, and dark aesthetics.
-      Specializing in motion-rich interfaces that push the boundaries of what's possible on the web.
+      "Behind this mask there is more than just flesh. Beneath this mask there is an idea... and ideas are bulletproof"
     </p>
+    
+    <!-- Social links -->
+    <div class="hero-socials">
+      <SocialLinks />
+    </div>
+
     <div class="hero-buttons">
       <a href={`${base}projects/`} class="btn btn-primary">
         <span>View Projects</span>
@@ -25,14 +35,6 @@ const base = import.meta.env.BASE_URL;
       <a href={`${base}blog/`} class="btn btn-secondary">
         <span>Read Blog</span>
       </a>
-    </div>
-
-    <!-- Tech stack badges -->
-    <div class="tech-stack">
-      <span class="tech-badge">TypeScript</span>
-      <span class="tech-badge">React</span>
-      <span class="tech-badge">Three.js</span>
-      <span class="tech-badge">Astro</span>
     </div>
   </div>
 
@@ -86,6 +88,29 @@ const base = import.meta.env.BASE_URL;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientFlow 4s ease infinite;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: color 0.2s ease;
+  }
+
+  .logo:hover {
+    color: var(--color-primary);
+  }
+
+  .logo-img {
+    height: 10rem;
+    width: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .logo-img:hover {
+    transform: scale(1.02);
   }
 
   @keyframes gradientFlow {
@@ -173,6 +198,13 @@ const base = import.meta.env.BASE_URL;
     gap: 0.75rem;
     justify-content: center;
     flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-socials {
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: center;
   }
 
   .tech-badge {
@@ -208,7 +240,7 @@ const base = import.meta.env.BASE_URL;
     opacity: 0.4;
   }
 
-  .glow-1 {
+  /* .glow-1 {
     width: 400px;
     height: 400px;
     background: var(--color-primary);
@@ -224,7 +256,7 @@ const base = import.meta.env.BASE_URL;
     bottom: 20%;
     right: 10%;
     animation: float 6s ease-in-out infinite reverse;
-  }
+  } */
 
   @keyframes fadeInUp {
     from {
