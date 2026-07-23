@@ -6,10 +6,11 @@ interface Props {
   slug: string;
   tags?: string[] | undefined;
   categories?: string[] | undefined;
+  activeTag?: string | undefined;
 }
 
 const base = import.meta.env.BASE_URL;
-const { title, description, pubDate, slug, tags, categories } = Astro.props;
+const { title, description, pubDate, slug, tags, categories, activeTag } = Astro.props;
 
 const formattedDate = pubDate.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -41,9 +42,7 @@ const categoriesJson = JSON.stringify(categories ?? []);
   {tags && tags.length > 0 && (
     <div class="blog-tags">
       {tags.map((tag) => (
-        <span class="tag" data-tag={tag} title={`Filter by ${tag}`}>
-          {tag}
-        </span>
+        <span class={`tag${activeTag && activeTag.toLowerCase() === tag.toLowerCase() ? ' active' : ''}`} data-tag={tag} title={`Filter by ${tag}`}>{tag}</span>
       ))}
     </div>
   )}
@@ -126,6 +125,7 @@ const categoriesJson = JSON.stringify(categories ?? []);
     color: var(--color-text-dim);
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
   }
 
   .tag:hover {
@@ -158,3 +158,35 @@ const categoriesJson = JSON.stringify(categories ?? []);
     transform: translateX(4px);
   }
 </style>
+
+<script is:inline>
+  (function() {
+    function init() {
+      document.querySelectorAll('.blog-card .tag[data-tag]').forEach(function(el) {
+        if (el.getAttribute('data-initialized')) return;
+        el.setAttribute('data-initialized', 'true');
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var tag = el.getAttribute('data-tag');
+          if (!tag) return;
+          tag = tag.toLowerCase();
+          var path = window.location.pathname;
+          var tagPage = '/blog/tag/' + encodeURIComponent(tag) + '/';
+          if (path === tagPage || path === tagPage.replace(/\/$/, '')) {
+            window.location.href = '/blog/';
+          } else {
+            window.location.href = tagPage;
+          }
+        });
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+    document.addEventListener('astro:page-load', init);
+  })();
+</script>

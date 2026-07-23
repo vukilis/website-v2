@@ -4,6 +4,7 @@ import { ClientRouter } from 'astro:transitions';
 import SiteBackdrop from '../components/SiteBackdrop.astro';
 import BackToTopButton from '../components/BackToTopButton.astro';
 import Footer from '../components/Footer.astro';
+import LightGalleryInit from '../components/LightGalleryInit.astro';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 interface Props {
@@ -30,6 +31,10 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lightgallery-bundle.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lg-thumbnail.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lg-pager.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.9.0/css/lg-share.min.css" />
     <title>{title}</title>
     
     <script is:inline>
@@ -70,7 +75,7 @@ const {
 
         const getInitialTheme = () => getSavedTheme() || getSystemTheme();
 
-        const applyTheme = (theme, shouldPersist = true) => {
+        let applyTheme = (theme, shouldPersist = true) => {
           html.setAttribute('data-theme', theme);
           const toggleBtn = document.getElementById('theme-toggle');
           if (toggleBtn) {
@@ -114,8 +119,26 @@ const {
           const saved = getSavedTheme();
           applyTheme(saved || getSystemTheme(), !!saved);
         });
+
+        // Notify widgets that depend on theme (Giscus)
+        const giscusContainer = () => document.querySelector('.giscus');
+        const broadcastThemeChange = () => {
+          const container = giscusContainer();
+          if (container) {
+            container.dispatchEvent(new CustomEvent('theme-changed', {
+              detail: { theme: html.getAttribute('data-theme') || 'dark' },
+              bubbles: true
+            }));
+          }
+        };
+        const originalApply = applyTheme;
+        applyTheme = (theme, shouldPersist = true) => {
+          originalApply(theme, shouldPersist);
+          broadcastThemeChange();
+        };
       })();
     </script>
     <BackToTopButton />
+    <LightGalleryInit />
   </body>
 </html>

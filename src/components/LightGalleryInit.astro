@@ -1,0 +1,123 @@
+---
+// src/components/LightGalleryInit.astro
+---
+
+<script type="module">
+  import lightGallery from 'lightgallery';
+  import lgFullscreen from 'lightgallery/plugins/fullscreen/lg-fullscreen.es5.js';
+  import lgRotate from 'lightgallery/plugins/rotate/lg-rotate.es5.js';
+  import lgZoom from 'lightgallery/plugins/zoom/lg-zoom.es5.js';
+  import lgThumbnail from 'lightgallery/plugins/thumbnail/lg-thumbnail.es5.js';
+  import lgVideo from 'lightgallery/plugins/video/lg-video.es5.js';
+
+  const instances = new WeakMap();
+  const handlers = new WeakMap();
+
+  function destroyExisting(container) {
+    const existing = instances.get(container);
+    if (existing && typeof existing.destroy === 'function') {
+      try { existing.destroy(true); } catch {}
+    }
+    const oldHandler = handlers.get(container);
+    if (oldHandler) {
+      container.removeEventListener('click', oldHandler);
+      handlers.delete(container);
+    }
+  }
+
+  async function initLightGallery() {
+    const container = document.querySelector('.post-content, article');
+    if (!container) return;
+
+    destroyExisting(container);
+
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const imgs = container.querySelectorAll('img');
+    if (!imgs.length) return;
+
+    const dynamicEl = Array.from(imgs)
+      .filter(img => img.src && !img.src.includes('img.shields.io') && !img.src.includes('badge'))
+      .map(img => ({
+        src: img.src,
+        thumb: img.src,
+        subHtml: img.alt ? `<h4>${img.alt}</h4>` : '',
+        alt: img.alt || '',
+      }));
+
+    if (!dynamicEl.length) return;
+
+    const instance = lightGallery(container, {
+      dynamic: true,
+      dynamicEl,
+      speed: 500,
+      download: true,
+      counter: true,
+      escKey: true,
+      swipeThreshold: 50,
+
+      plugins: [
+        lgFullscreen,
+        lgRotate,
+        lgZoom,
+        lgThumbnail,
+        lgVideo,
+      ],
+
+      zoom: true,
+      enableZoomAfter: 200,
+      scale: 1.2,
+      actualSize: true,
+      showZoomInOutIcons: true,
+
+      fullScreen: true,
+
+      rotate: true,
+      rotateSpeed: 400,
+      rotateLeft: true,
+      rotateRight: true,
+      flipHorizontal: false,
+      flipVertical: false,
+
+      thumbnail: true,
+      animateThumb: true,
+      currentPagerPosition: 'middle',
+      alignThumbnails: 'middle',
+      thumbWidth: 120,
+      thumbHeight: '80px',
+      thumbMargin: 8,
+      appendThumbnailsTo: '.lg-components',
+      toggleThumb: true,
+      allowMediaOverlap: true,
+      enableThumbDrag: true,
+      enableThumbSwipe: true,
+
+      autoplayFirstVideo: false,
+      gotoNextSlideOnVideoEnd: true,
+    });
+
+    instances.set(container, instance);
+
+    const boundHandler = (e) => {
+      const img = e.target.closest?.('img');
+      if (!img || !container.contains(img)) return;
+      if (instance.lgOpened) return;
+      const allImgs = container.querySelectorAll('img');
+      const index = Array.from(allImgs).indexOf(img);
+      if (index >= 0) {
+        instance.openGallery(index);
+      }
+    };
+
+    container.addEventListener('click', boundHandler);
+    handlers.set(container, boundHandler);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initLightGallery, 0));
+  } else {
+    setTimeout(initLightGallery, 0);
+  }
+
+  document.addEventListener('astro:page-load', () => setTimeout(initLightGallery, 0));
+</script>

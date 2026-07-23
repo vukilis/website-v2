@@ -1,21 +1,27 @@
 ---
-import { getCollection } from 'astro:content';
-
 interface Props {
-  posts: { data: { title: string; tags?: string[]; categories?: string[] } }[];
+  allPosts: { data: { categories?: string[] } }[];
+  activeCategory?: string;
 }
 
-const { posts } = Astro.props;
+const { allPosts, activeCategory } = Astro.props;
+
 const categoryCounts = new Map(
-  [...new Set(posts.flatMap(p => p.data.categories ?? []))].map(category => [
+  [...new Set(allPosts.flatMap(p => p.data.categories ?? []))].map(category => [
     category,
-    posts.filter(p => (p.data.categories ?? []).includes(category)).length,
+    allPosts.filter(p => (p.data.categories ?? []).includes(category)).length,
   ])
 );
 
 const allCategories = [...categoryCounts.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .map(entry => entry[0]);
+
+function isActiveCategory(cat: string) {
+  return activeCategory ? activeCategory.toLowerCase() === cat.toLowerCase() : false;
+}
+
+const allPostsCount = allPosts.length;
 ---
 
 <div class="blog-filter">
@@ -24,157 +30,25 @@ const allCategories = [...categoryCounts.entries()]
       <div class="filter-section">
         <span class="filter-label">Categories</span>
         <div class="filter-pills">
+          <a
+            href="/blog/"
+            class={`filter-pill${!activeCategory ? ' active' : ''}`}
+          >
+            All <span class="filter-pill-count">{allPostsCount}</span>
+          </a>
           {allCategories.map(category => (
-            <button
-              class="filter-pill"
-              data-filter-type="category"
-              data-filter-value={category}
+            <a
+              href={`/blog/category/${category.toLowerCase()}/`}
+              class={`filter-pill${isActiveCategory(category) ? ' active' : ''}`}
             >
               {category} <span class="filter-pill-count">{categoryCounts.get(category)}</span>
-            </button>
+            </a>
           ))}
         </div>
       </div>
     </div>
   )}
 </div>
-
-<script>
-  let popstateBound = false;
-
-  const initFilters = () => {
-    const filterPills = document.querySelectorAll('.filter-pill');
-    const blogCards = document.querySelectorAll('.blog-card');
-
-    if (filterPills.length === 0 || blogCards.length === 0) return;
-
-    const searchParams = new URLSearchParams(window.location.search);
-    const activeFilters = new Map();
-
-    if (searchParams.has('tag')) activeFilters.set('tag', searchParams.get('tag'));
-    if (searchParams.has('category')) activeFilters.set('category', searchParams.get('category'));
-
-    const navigateToFilter = (type, value) => {
-      activeFilters.clear();
-      if (type === 'tag') {
-        activeFilters.set('tag', value);
-      } else if (type === 'category') {
-        activeFilters.set('category', value);
-      }
-      const params = new URLSearchParams(window.location.search);
-      if (activeFilters.has('tag')) {
-        params.set('tag', activeFilters.get('tag')!);
-      } else {
-        params.delete('tag');
-      }
-      if (activeFilters.has('category')) {
-        params.set('category', activeFilters.get('category')!);
-      } else {
-        params.delete('category');
-      }
-      const qs = params.toString();
-      window.history.pushState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
-      applyFilters();
-    };
-
-    const isFiltered = (card) => {
-      if (activeFilters.size === 0) return true;
-      const cardTags = card.dataset.tags ? JSON.parse(card.dataset.tags) : [];
-      const cardCategories = card.dataset.categories ? JSON.parse(card.dataset.categories) : [];
-      if (activeFilters.has('tag') && !cardTags.includes(activeFilters.get('tag'))) return false;
-      if (activeFilters.has('category') && !cardCategories.includes(activeFilters.get('category'))) return false;
-      return true;
-    };
-
-    blogCards.forEach((card) => {
-      const cardTags = card.querySelectorAll('.tag[data-tag]');
-      cardTags.forEach((tagEl) => {
-        tagEl.addEventListener('click', (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          navigateToFilter('tag', tagEl.getAttribute('data-tag')!);
-        });
-      });
-    });
-
-    const applyFilters = () => {
-      blogCards.forEach((card) => {
-        card.style.display = isFiltered(card) ? '' : 'none';
-      });
-      filterPills.forEach((pill) => {
-        const type = pill.dataset.filterType;
-        const value = pill.dataset.filterValue;
-        const active = activeFilters.has(type) && activeFilters.get(type) === value;
-        pill.classList.toggle('active', active);
-        pill.style.background = active ? 'rgba(59, 130, 246, 0.2)' : '';
-        pill.style.borderColor = active ? 'rgba(59, 130, 246, 0.5)' : '';
-        pill.style.color = active ? 'var(--color-accent-blue, #3B82F6)' : '';
-      });
-
-      const activeTagValue = activeFilters.has('tag') ? activeFilters.get('tag')! : null;
-      blogCards.forEach((card) => {
-        const cardTags = card.querySelectorAll('.tag[data-tag]');
-        cardTags.forEach((tagEl) => {
-          const isActive = activeTagValue && tagEl.getAttribute('data-tag') === activeTagValue;
-          tagEl.classList.toggle('active', isActive);
-        });
-      });
-    };
-
-    filterPills.forEach((pill) => {
-      pill.addEventListener('click', () => {
-        const type = pill.dataset.filterType;
-        const value = pill.dataset.filterValue;
-
-        if (type === 'category' && activeFilters.has('category') && activeFilters.get('category') === value) {
-          activeFilters.delete('category');
-        } else {
-          activeFilters.set(type, value);
-          if (type === 'category') activeFilters.delete('tag');
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        if (activeFilters.has('tag')) {
-          params.set('tag', activeFilters.get('tag'));
-        } else {
-          params.delete('tag');
-        }
-        if (activeFilters.has('category')) {
-          params.set('category', activeFilters.get('category'));
-        } else {
-          params.delete('category');
-        }
-        const qs = params.toString();
-        window.history.pushState({}, '', window.location.pathname + (qs ? '?' + qs : ''));
-        applyFilters();
-      });
-    });
-
-    if (!popstateBound) {
-      popstateBound = true;
-      window.addEventListener('popstate', () => {
-        activeFilters.clear();
-        const sp = new URLSearchParams(window.location.search);
-        if (sp.has('tag')) activeFilters.set('tag', sp.get('tag'));
-        if (sp.has('category')) activeFilters.set('category', sp.get('category'));
-        applyFilters();
-      });
-    }
-
-    applyFilters();
-  };
-
-  const scheduleInit = () => {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initFilters, { once: true });
-    } else {
-      initFilters();
-    }
-  };
-
-  scheduleInit();
-  document.addEventListener('astro:page-load', scheduleInit);
-</script>
 
 <style>
   .blog-filter {
@@ -209,6 +83,8 @@ const allCategories = [...categoryCounts.entries()]
   }
 
   .filter-pill {
+    display: inline-flex;
+    align-items: center;
     padding: 0.35rem 0.875rem;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--color-border, #334155);
@@ -218,15 +94,16 @@ const allCategories = [...categoryCounts.entries()]
     font-family: var(--font-body, 'DM Sans', sans-serif);
     letter-spacing: .04em;
     color: var(--color-text-dim, #94A3B8);
-    cursor: pointer;
+    text-decoration: none;
     transition: all .2s cubic-bezier(.4, 0, .2, 1);
     outline: none;
+    cursor: pointer;
   }
 
   .filter-pill:hover {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.4);
-  color: var(--color-accent-blue, #3B82F6);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: var(--color-accent-blue, #3B82F6);
   }
 
   .filter-pill.active {

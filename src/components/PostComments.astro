@@ -1,8 +1,13 @@
 <section class="giscus mx-auto mt-10 w-full"></section>
 
 <script>
-  function loadGiscus() {
-    const container = document.querySelector('.giscus');
+  const giscusContainer = () => document.querySelector('.giscus');
+
+  function loadGiscus(theme) {
+    if (theme === undefined) {
+      theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    }
+    const container = giscusContainer();
     if (!container) return;
     container.innerHTML = '';
     const script = document.createElement('script');
@@ -16,7 +21,7 @@
     script.setAttribute('data-reactions-enabled', '1');
     script.setAttribute('data-emit-metadata', '0');
     script.setAttribute('data-input-position', 'bottom');
-    script.setAttribute('data-theme', 'dark');
+    script.setAttribute('data-theme', theme);
     script.setAttribute('data-lang', 'en');
     script.setAttribute('data-loading', 'lazy');
     script.setAttribute('crossorigin', 'anonymous');
@@ -24,15 +29,17 @@
     container.appendChild(script);
   }
 
+  loadGiscus();
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadGiscus);
-  } else {
-    loadGiscus();
   }
 
   document.addEventListener('astro:page-load', () => {
-    if (document.querySelector('.giscus')) {
-      loadGiscus();
-    }
+    loadGiscus();
+  });
+
+  document.addEventListener('theme-changed', (e) => {
+    loadGiscus(e.detail.theme);
   });
 </script>

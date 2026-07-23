@@ -1,9 +1,17 @@
 ---
 interface Props {
-  posts: { id: string; data: { title: string } }[];
+  allPosts: { id: string; data: { title: string; tags?: string[]; categories?: string[] } }[];
 }
 
-const { posts } = Astro.props;
+const { allPosts } = Astro.props;
+
+const globalPostIndex = allPosts.map(post => ({
+  id: post.id,
+  title: post.data.title,
+  url: `/blog/${post.id}/`,
+  tags: post.data.tags ?? [],
+  categories: post.data.categories ?? [],
+}));
 ---
 
 <div class="blog-search-wrapper" id="blog-search-wrapper">
@@ -44,25 +52,17 @@ const { posts } = Astro.props;
       role="listbox"
       hidden
     ></ul>
-    <div id="blog-search-status" class="search-status" hidden>
-      <span class="search-status-icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" x2="16.65" y1="21" y2="16.65" />
-        </svg>
-      </span>
-      <span class="search-status-text" id="blog-search-status-text"></span>
-    </div>
   </div>
 </div>
 
+<script type="application/json" id="blog-search-posts-data" set:html={JSON.stringify(globalPostIndex)}></script>
+
 <script is:inline>
+(function() {
   function scheduleInit(id) {
     var key = '__blog_search_initialized_' + id;
-    if (window[key]) {
-      window[key] = false;
-    }
-    var wrapper = function () { return document.getElementById(id); };
+    if (window[key]) window[key] = false;
+    var wrapper = function () { return document.getElementById('blog-search-wrapper'); };
     var init = function () {
       var root = wrapper();
       if (!root) return;
@@ -70,25 +70,23 @@ const { posts } = Astro.props;
       var input = root.querySelector('.search-input');
       var clearBtn = root.querySelector('.search-clear');
       var suggestionsList = root.querySelector('.search-suggestions');
-      var statusBar = root.querySelector('.search-status');
-      var statusText = root.querySelector('.search-status-text');
 
-      if (!input || !clearBtn || !suggestionsList || !statusBar || !statusText) return;
+      if (!input || !clearBtn || !suggestionsList) return;
 
-      var blogCards = document.querySelectorAll('.blog-card');
-      if (blogCards.length === 0) return;
+      var dataEl = document.getElementById('blog-search-posts-data');
+      var ALL_POSTS = [];
+      if (dataEl) {
+        try { ALL_POSTS = JSON.parse(dataEl.textContent || '[]'); } catch (e) { ALL_POSTS = []; }
+      }
 
       var postMap = new Map();
-      var postTitles = Array.from(blogCards).map(function (card) {
-        var titleEl = card.querySelector('.blog-title');
-        var title = titleEl ? (titleEl.textContent || '').trim() : '';
-        var slug = card.getAttribute('href') || '';
-        postMap.set(title.toLowerCase(), { title: title, slug: slug, card: card });
-        return title;
+      var postTitles = [];
+      ALL_POSTS.forEach(function (post) {
+        postMap.set(post.title.toLowerCase(), post);
+        postTitles.push(post.title);
       });
 
       var currentQuery = '';
-      var currentQueryField = input;
       var activeIndex = -1;
       var currentSuggestions = [];
 
@@ -105,8 +103,6 @@ const { posts } = Astro.props;
         li.setAttribute('role', 'option');
         li.setAttribute('aria-selected', 'false');
 
-        var icon = document.createElement('span');
-        
         var titleSpan = document.createElement('span');
         titleSpan.className = 'suggestion-title';
         titleSpan.innerHTML = highlightMatch(title, query);
@@ -115,7 +111,6 @@ const { posts } = Astro.props;
         arrow.className = 'suggestion-arrow';
         arrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
 
-        li.appendChild(icon);
         li.appendChild(titleSpan);
         li.appendChild(arrow);
 
@@ -150,7 +145,7 @@ const { posts } = Astro.props;
           emptyLi.className = 'search-suggestion empty';
           emptyLi.setAttribute('role', 'option');
           emptyLi.setAttribute('aria-selected', 'false');
-          emptyLi.innerHTML = '<span class="suggestion-empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg></span><span class="suggestion-empty-text">No posts match "<strong>' + query.replace(/"/g, '') + '</strong>"</span>';
+          emptyLi.innerHTML = '<span class="suggestion-empty-text">No posts match "<strong>' + query.replace(/"/g, '') + '</strong>"</span>';
           suggestionsList.appendChild(emptyLi);
           suggestionsList.hidden = false;
           input.setAttribute('aria-expanded', 'true');
@@ -204,15 +199,7 @@ const { posts } = Astro.props;
         clearBtn.hidden = false;
         input.classList.add('has-value');
         hideSuggestions();
-        applySearch();
-        entry.card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        entry.card.style.transition = 'box-shadow 0.4s ease, border-color 0.4s ease';
-        entry.card.style.borderColor = 'var(--color-primary, #3B82F6)';
-        entry.card.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.2), 0 8px 30px rgba(59, 130, 246, 0.15)';
-        setTimeout(function () {
-          entry.card.style.borderColor = '';
-          entry.card.style.boxShadow = '';
-        }, 2000);
+        window.location.href = entry.url;
       }
 
       function hideSuggestions() {
@@ -221,19 +208,6 @@ const { posts } = Astro.props;
         input.setAttribute('aria-expanded', 'false');
         currentSuggestions = [];
         activeIndex = -1;
-      }
-
-      function applySearch() {
-        var query = currentQuery.trim().toLowerCase();
-        var visibleCount = 0;
-
-        blogCards.forEach(function (card) {
-          var titleEl = card.querySelector('.blog-title');
-          if (!titleEl) return;
-          var match = query === '' || (titleEl.textContent || '').toLowerCase().indexOf(query) !== -1;
-          card.style.display = match ? '' : 'none';
-          if (match) visibleCount++;
-        });
       }
 
       input.addEventListener('input', function () {
@@ -245,7 +219,6 @@ const { posts } = Astro.props;
           input.classList.remove('has-value');
         }
         renderSuggestions(currentQuery);
-        applySearch();
       });
 
       input.addEventListener('keydown', function (e) {
@@ -272,7 +245,6 @@ const { posts } = Astro.props;
               selectSuggestion(currentSuggestions[activeIndex].title);
             } else {
               hideSuggestions();
-              applySearch();
             }
             return;
           }
@@ -306,18 +278,7 @@ const { posts } = Astro.props;
         input.classList.remove('has-value');
         hideSuggestions();
         input.focus();
-        applySearch();
       });
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-          if (currentQuery === '') {
-            statusBar.hidden = true;
-          }
-        }, { once: true });
-      }
-
-      applySearch();
     };
 
     if (document.readyState === 'loading') {
@@ -329,4 +290,5 @@ const { posts } = Astro.props;
 
   scheduleInit('blog-search');
   document.addEventListener('astro:page-load', function () { scheduleInit('blog-search'); });
+})();
 </script>

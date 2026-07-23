@@ -1,0 +1,142 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import BlogFilter from '../../components/BlogFilter.astro';
+import BlogSearch from '../../components/BlogSearch.astro';
+import Pagination from '../../components/Pagination.astro';
+import type { Page } from 'astro';
+
+export async function getStaticPaths({ paginate }: { paginate: (...args: any[]) => Promise<any[]> }) {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+  const sorted = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  return paginate(sorted, {
+    pageSize: 9,
+    format: (p) => `/blog/${!p || p === '/' ? '' : p}`
+  });
+}
+
+type BlogPost = CollectionEntry<'blog'>;
+
+const { page } = Astro.props;
+
+const allPostsForSearch = await getCollection('blog', ({ data }) => !data.draft);
+const sortedAllPosts = allPostsForSearch.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title={(page as any).currentPage > 1 ? `Blog | Page ${(page as any).currentPage}` : 'Blog - Darkness'}
+  description="Articles about web development, Three.js, and dark design"
+>
+  <Navigation />
+
+  <main class="blog-page" id="main-content">
+    <div class="container">
+      <header class="blog-header">
+        <h1 class="page-title">Blog</h1>
+        <p class="page-subtitle">
+          This blog is made to document all my work, store a different guides and how-to articles.
+        </p>
+      </header>
+
+      <BlogSearch allPosts={sortedAllPosts} />
+      <BlogFilter allPosts={sortedAllPosts} activeCategory={undefined} />
+
+      <div class="blog-grid">
+        {page.data.length > 0 ? (
+          page.data.map((post: BlogPost) => (
+            <BlogCard
+              title={post.data.title}
+              description={post.data.description}
+              pubDate={post.data.pubDate}
+              slug={post.id}
+              tags={post.data.tags}
+              categories={post.data.categories}
+              activeTag={undefined}
+            />
+          ))
+        ) : (
+          <p class="no-results">No posts found.</p>
+        )}
+      </div>
+
+      <Pagination
+        page={page}
+        baseUrl="/blog"
+        showFirstLast={true}
+        maxVisible={5}
+      />
+    </div>
+  </main>
+</BaseLayout>
+
+<link rel="canonical" href={`${Astro.site}${typeof page.url === 'string' ? page.url : page.url.pathname}`} />
+{(page as any).prev && <link rel="prev" href={(page as any).prev.href} />}
+{(page as any).next && <link rel="next" href={(page as any).next.href} />}
+
+<style>
+  .blog-page {
+    min-height: 100vh;
+    padding: calc(var(--nav-height) + 2rem) 2rem 5rem;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .blog-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-dim);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-dim);
+    font-size: 1.05rem;
+  }
+
+  .no-results a {
+    color: var(--color-accent-purple);
+    text-decoration: none;
+  }
+
+  .no-results a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .blog-page {
+      padding-top: calc(var(--nav-height) + 1rem);
+    }
+
+    .blog-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
