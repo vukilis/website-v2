@@ -1,10 +1,11 @@
 ---
 interface Props {
-  allPosts: { data: { categories?: string[] } }[];
+  allProjects: { data: { categories?: string[] } }[];
   activeCategory?: string;
+  baseUrl?: string;
 }
 
-const { allPosts, activeCategory } = Astro.props;
+const { allProjects, activeCategory, baseUrl = '/projects/it/' } = Astro.props;
 
 function slugify(str: string) {
   return str
@@ -16,9 +17,9 @@ function slugify(str: string) {
 }
 
 const categoryCounts = new Map(
-  [...new Set(allPosts.flatMap(p => p.data.categories ?? []))].map(category => [
+  [...new Set(allProjects.flatMap(p => p.data.categories ?? []))].map(category => [
     category,
-    allPosts.filter(p => (p.data.categories ?? []).includes(category)).length,
+    allProjects.filter(p => (p.data.categories ?? []).includes(category)).length,
   ])
 );
 
@@ -30,7 +31,7 @@ function isActiveCategory(cat: string) {
   return activeCategory ? slugify(activeCategory) === slugify(cat) : false;
 }
 
-const allPostsCount = allPosts.length;
+const allProjectsCount = allProjects.length;
 ---
 
 <div class="blog-filter">
@@ -40,14 +41,14 @@ const allPostsCount = allPosts.length;
         <span class="filter-label">Categories</span>
         <div class="filter-pills">
           <a
-            href="/blog/"
+            href={baseUrl}
             class={`filter-pill${!activeCategory ? ' active' : ''}`}
           >
-            All <span class="filter-pill-count">{allPostsCount}</span>
+            All <span class="filter-pill-count">{allProjectsCount}</span>
           </a>
           {allCategories.map(category => (
             <a
-              href={`/blog/category/${slugify(category)}/`}
+              href={`${baseUrl}category/${slugify(category)}/`}
               class={`filter-pill${isActiveCategory(category) ? ' active' : ''}`}
             >
               {category} <span class="filter-pill-count">{categoryCounts.get(category)}</span>

@@ -6,7 +6,6 @@ import BlogCard from '../../components/BlogCard.astro';
 import BlogFilter from '../../components/BlogFilter.astro';
 import BlogSearch from '../../components/BlogSearch.astro';
 import Pagination from '../../components/Pagination.astro';
-import type { Page } from 'astro';
 
 export async function getStaticPaths({ paginate }: { paginate: (...args: any[]) => Promise<any[]> }) {
   const allPosts = await getCollection('blog', ({ data }) => !data.draft);
@@ -27,8 +26,8 @@ const sortedAllPosts = allPostsForSearch.sort((a, b) => b.data.pubDate.valueOf()
 ---
 
 <BaseLayout
-  title={(page as any).currentPage > 1 ? `Blog | Page ${(page as any).currentPage}` : 'Blog - Darkness'}
-  description="Articles about web development, Three.js, and dark design"
+  title="Blog - Vuk1lis"
+  description="This blog is made to document all my work, store a different guides and how-to articles."
 >
   <Navigation />
 

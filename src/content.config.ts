@@ -15,8 +15,8 @@ const blog = defineCollection({
   }),
 });
 
-const projects = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
+const projectsIT = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/projects/it' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -29,4 +29,32 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { blog, projects };
+const projectsDesign = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/projects/design' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    image: z.string().optional(),
+    link: z.string().optional(),
+    github: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    categories: z.array(z.string()).optional(),
+    featured: z.boolean().default(false),
+  }),
+});
+
+const projectsMusic = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/projects/music' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    image: z.string().optional(),
+    link: z.string().optional(),
+    github: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    categories: z.array(z.string()).optional(),
+    featured: z.boolean().default(false),
+  }),
+});
+
+export const collections = { blog, projectsIT, projectsDesign, projectsMusic };

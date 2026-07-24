@@ -6,7 +6,6 @@ import BlogCard from '../../../../components/BlogCard.astro';
 import BlogFilter from '../../../../components/BlogFilter.astro';
 import BlogSearch from '../../../../components/BlogSearch.astro';
 import Pagination from '../../../../components/Pagination.astro';
-import type { Page } from 'astro';
 
 export async function getStaticPaths({ paginate }: { paginate: (...args: any[]) => Promise<any[]> }) {
   const allPosts = await getCollection('blog', ({ data }) => !data.draft);
@@ -36,28 +35,21 @@ const urlStr = Astro.url.pathname;
 const tagMatch = urlStr.match(/\/blog\/tag\/([^\/]+)/);
 const activeTag = tagMatch ? tagMatch[1] : 'unknown';
 
-const currentPage = (page as any).currentPage;
-
 const allPostsForSearch = await getCollection('blog', ({ data }) => !data.draft);
 const sortedAllPosts = allPostsForSearch.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout
-  title={`${activeTag.charAt(0).toUpperCase() + activeTag.slice(1)} | Blog`}
-  description={`Blog posts tagged "${activeTag}"`}
->
+<BaseLayout title="Blog - Vuk1lis" description="This blog is made to document all my work, store a different guides and how-to articles.">
   <Navigation />
 
   <main class="blog-page" id="main-content">
     <div class="container">
       <header class="blog-header">
-        <h1 class="page-title">{activeTag.charAt(0).toUpperCase() + activeTag.slice(1)}</h1>
-        <p class="page-subtitle">Posts tagged "{activeTag}"</p>
+        <h1 class="page-title">Blog / {activeTag.charAt(0).toLowerCase() + activeTag.slice(1)}</h1>
+        <p class="page-subtitle">
+          This blog is made to document all my work, store a different guides and how-to articles.
+        </p>
       </header>
-
-      <a href="/blog/" class="back-to-all-posts">
-        &larr; All posts
-      </a>
 
       <BlogSearch allPosts={sortedAllPosts} />
       <BlogFilter allPosts={sortedAllPosts} />
@@ -97,19 +89,6 @@ const sortedAllPosts = allPostsForSearch.sort((a, b) => b.data.pubDate.valueOf()
 {(page as any).next && <link rel="next" href={(page as any).next.href} />}
 
 <style>
-  .back-to-all-posts {
-    display: inline-block;
-    margin-bottom: 1.5rem;
-    color: var(--color-text-dim);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
-  }
-
-  .back-to-all-posts:hover {
-    color: var(--color-primary);
-  }
 
   .blog-page {
     min-height: 100vh;

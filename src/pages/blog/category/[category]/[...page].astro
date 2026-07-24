@@ -6,26 +6,35 @@ import BlogCard from '../../../../components/BlogCard.astro';
 import BlogFilter from '../../../../components/BlogFilter.astro';
 import BlogSearch from '../../../../components/BlogSearch.astro';
 import Pagination from '../../../../components/Pagination.astro';
-import type { Page } from 'astro';
 
 export async function getStaticPaths({ paginate }: { paginate: (...args: any[]) => Promise<any[]> }) {
   const allPosts = await getCollection('blog', ({ data }) => !data.draft);
   const sorted = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
   const categories = [
-    ...new Set(sorted.flatMap(p => (p.data.categories ?? []).map(c => c.toLowerCase())))
+    ...new Set(sorted.flatMap(p => p.data.categories ?? []))
   ];
 
-  return categories.flatMap(cat =>
-    paginate(
-      sorted.filter(p => (p.data.categories ?? []).map(c => c.toLowerCase()).includes(cat)),
+  function slugify(str: string) {
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-');
+  }
+
+  return categories.flatMap(cat => {
+    const slug = slugify(cat);
+    return paginate(
+      sorted.filter(p => (p.data.categories ?? []).includes(cat)),
       {
-        params: { category: cat },
+        params: { category: slug },
         pageSize: 9,
-        format: (p) => `/blog/category/${cat}${!p || p === '/' ? '' : '/' + p}`
+        format: (p) => `/blog/category/${slug}${!p || p === '/' ? '' : '/' + p}`
       }
-    )
-  );
+    );
+  });
 }
 
 type BlogPost = CollectionEntry<'blog'>;
@@ -36,28 +45,36 @@ const urlStr = Astro.url.pathname;
 const categoryMatch = urlStr.match(/\/blog\/category\/([^\/]+)/);
 const categorySlug = categoryMatch ? categoryMatch[1] : 'unknown';
 
-const currentPage = (page as any).currentPage;
-
 const allPostsForSearch = await getCollection('blog', ({ data }) => !data.draft);
 const sortedAllPosts = allPostsForSearch.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+function slugify(str: string) {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');
+}
+
+const allCategories = [...new Set(sortedAllPosts.flatMap(p => p.data.categories ?? []))];
+const activeCategoryName = allCategories.find(cat => slugify(cat) === categorySlug) || categorySlug;
 ---
 
 <BaseLayout
-  title={`${categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)} | Blog`}
-  description={`Blog posts in ${categorySlug}`}
->
-  <Navigation />
+  title="Blog - Vuk1lis"
+  description="This blog is made to document all my work, store a different guides and how-to articles."
+>  
+<Navigation />
 
   <main class="blog-page" id="main-content">
     <div class="container">
       <header class="blog-header">
-        <h1 class="page-title">{categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)}</h1>
-        <p class="page-subtitle">Posts in "{categorySlug}"</p>
+        <h1 class="page-title">Blog / {activeCategoryName.charAt(0).toUpperCase() + activeCategoryName.slice(1)}</h1>
+        <p class="page-subtitle">
+          This blog is made to document all my work, store a different guides and how-to articles.
+        </p>
       </header>
-
-      <a href="/blog/" class="back-to-all-posts">
-        &larr; All posts
-      </a>
 
       <BlogSearch allPosts={sortedAllPosts} />
       <BlogFilter allPosts={sortedAllPosts} activeCategory={categorySlug} />
@@ -97,19 +114,6 @@ const sortedAllPosts = allPostsForSearch.sort((a, b) => b.data.pubDate.valueOf()
 {(page as any).next && <link rel="next" href={(page as any).next.href} />}
 
 <style>
-  .back-to-all-posts {
-    display: inline-block;
-    margin-bottom: 1.5rem;
-    color: var(--color-text-dim);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
-  }
-
-  .back-to-all-posts:hover {
-    color: var(--color-primary);
-  }
 
   .blog-page {
     min-height: 100vh;
